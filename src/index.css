@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global CSS fayliga qo'shing */
+.sidebar-indicator {
+  transition: top 0.3s ease, height 0.3s ease;
+}
 .btn-loader {
   height: 20px;
   aspect-ratio: 2.5;

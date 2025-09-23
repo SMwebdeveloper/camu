@@ -45,7 +45,7 @@ export default function Login() {
     onSuccess: (data) => {
       setUser(data);
       sessionStorage.setItem("accessToken", data.data.access_token)
-      // navigate('/')
+      navigate('/')
     },
     onError: (error) => {
       console.log(error);

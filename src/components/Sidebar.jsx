@@ -2,17 +2,19 @@ import { NavLink, Link, useLocation } from "react-router-dom";
 import Logo from "../assets/logo.jpg";
 import { IoHomeOutline } from "react-icons/io5";
 import { TbReportAnalytics } from "react-icons/tb";
-import {
-  FiChevronDown,
-  FiUsers,
-  
-} from "react-icons/fi";
+import { FiChevronDown } from "react-icons/fi";
+import { PiStudent } from "react-icons/pi";
 import { FaBullhorn, FaChartLine } from "react-icons/fa";
 import useLanguageStore from "../store/useLanguage";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 
-export default function Sidebar({ isOpen, mobileOpen, onToggleSidebar, onClose }) {
+export default function Sidebar({
+  isOpen,
+  mobileOpen,
+  onToggleSidebar,
+  onClose,
+}) {
   const t = useLanguageStore((state) => state.t);
   const language = useLanguageStore((state) => state.language);
 
@@ -36,7 +38,7 @@ export default function Sidebar({ isOpen, mobileOpen, onToggleSidebar, onClose }
         },
       ],
     },
-    { to: "/students", label: "Students", icon: <FiUsers size={20} /> },
+    { to: "/students", label: "Students", icon: <PiStudent size={20} /> },
   ];
 
   const location = useLocation();
@@ -47,7 +49,7 @@ export default function Sidebar({ isOpen, mobileOpen, onToggleSidebar, onClose }
   const toggleDropdown = (index, event) => {
     event.preventDefault();
     event.stopPropagation();
-    if(!isOpen) onToggleSidebar();
+    if (!isOpen) onToggleSidebar();
     setOpenDropdown(openDropdown === index ? null : index);
   };
 
@@ -70,9 +72,7 @@ export default function Sidebar({ isOpen, mobileOpen, onToggleSidebar, onClose }
     // Agar joriy yo'l Reports ichida bo'lsa, dropdown ni ochiq qilish
     if (
       links[1].submenu.some(
-        (sub) =>
-          currentPath.startsWith(sub.to) ||
-          currentPath === "/reports"
+        (sub) => currentPath.startsWith(sub.to) || currentPath === "/reports"
       )
     ) {
       setOpenDropdown(1);
@@ -252,7 +252,7 @@ export default function Sidebar({ isOpen, mobileOpen, onToggleSidebar, onClose }
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="p-4 h-16 flex items-center border-b border-gray-700">
+        <div className="p-4 h-16 flex items-start justify-between border-b border-gray-700">
           <Link to="/" className="flex items-center gap-3">
             <img
               src={Logo}
@@ -261,6 +261,7 @@ export default function Sidebar({ isOpen, mobileOpen, onToggleSidebar, onClose }
             />
             <span className="font-bold text-xl">CAMU CRM</span>
           </Link>
+          <button className="text-lg text-gray-300" onClick={onClose}>&times;</button>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">

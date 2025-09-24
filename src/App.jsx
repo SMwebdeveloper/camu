@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Students from "./pages/Students";
 import Finance from "./pages/Finance";
 import Marketing from "./pages/Marketing";
+import RouteGuard from "./components/RouteGuard";
 
 function App() {
   return (
@@ -13,12 +14,26 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Auth layout */}
-          <Route path="/login" element={<AuthLayout />}>
+          <Route
+            path="/login"
+            element={
+              <RouteGuard type="auth">
+                <AuthLayout />
+              </RouteGuard>
+            }
+          >
             <Route index element={<Login />} />
           </Route>
 
           {/* Main layout */}
-          <Route path="/" element={<MainLayout />}>
+          <Route
+            path="/"
+            element={
+              <RouteGuard type="protected">
+                <MainLayout />
+              </RouteGuard>
+            }
+          >
             <Route index element={<Home />} />
             <Route path="/reports">
               <Route path="finance" element={<Finance />} />

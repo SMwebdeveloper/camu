@@ -31,6 +31,7 @@ const tranlations = {
       main_title: "Shifokorlar Universiteti",
       description: "Tibbiyot sohasidagi eng yaxshi ta'lim",
       short_description: "Professional CRM tizimi",
+      login_success: "Muvaffaqiyatli tizimga kirdingiz",
     },
     sidebar: {
       dashboard: "Bosh sahifa",
@@ -53,6 +54,7 @@ const tranlations = {
       settings_subtitle: "Tizim sozlamalari",
       logout_title: "Chiqish",
       logout_subtitle: "Hisobdan chiqish",
+      logout_success: "Muvaffaqiyatli chiqildi",
     },
     loading: "Ma'lumotlar yuklanmoqda...",
   },
@@ -88,6 +90,7 @@ const tranlations = {
       main_title: "University of Physicians",
       description: "The best education in the medical field",
       short_description: "Professional CRM system",
+      login_success: "Successfully logged in",
     },
     sidebar: {
       dashboard: "Dashboard",
@@ -110,6 +113,7 @@ const tranlations = {
       settings_subtitle: "System Settings",
       logout_title: "Logout",
       logout_subtitle: "Sign out of your account",
+      logout_success: "Successfully logged out",
     },
     loading: "Loading data...",
   },
@@ -145,6 +149,7 @@ const tranlations = {
       main_title: "Университет врачей",
       description: "Лучшее образование в сфере медицины",
       short_description: "Профессиональная CRM-система",
+      login_success: "Успешный вход в систему",
     },
     sidebar: {
       dashboard: "Панель управления",
@@ -167,6 +172,7 @@ const tranlations = {
       settings_subtitle: "Системные настройки",
       logout_title: "Выйти",
       logout_subtitle: "Выйти из аккаунта",
+      logout_success: "Успешный выход из системы",
     },
     loading: "Загрузка данных...",
   },

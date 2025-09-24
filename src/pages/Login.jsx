@@ -49,7 +49,7 @@ export default function Login() {
       navigate('/', {
         state: { from: "/login", firstVisit: true },
       })
-      toast.success("Tizimga muvaffaqiyatli kirdingiz!");
+      toast.success(t("login.login_success"));
     },
     onError: (error) => {
       console.log(error);

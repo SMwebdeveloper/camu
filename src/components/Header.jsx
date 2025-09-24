@@ -1,6 +1,5 @@
-import { TbBell } from "react-icons/tb";
 import { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   FiUser,
   FiLogOut,
@@ -9,44 +8,48 @@ import {
   FiMail,
   FiShield,
 } from "react-icons/fi";
-import clsx from "clsx";import { CgMenuLeft } from "react-icons/cg";
+import clsx from "clsx";
+import { CgMenuLeft } from "react-icons/cg";
 import LanguageSelect from "./LanguageSelect";
 import useLanguageStore from "../store/useLanguage";
+import useAuthStore from "../store/useAuth";
+import toast from "react-hot-toast";
 
 export default function Header({ onToggleSidebar, onToggleMobile }) {
-      const [isProfileOpen, setIsProfileOpen] = useState(false);
-      const profileRef = useRef(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
 
-      const t = useLanguageStore((state) => state.t);
-      const language = useLanguageStore((state) => state.language);
+  const t = useLanguageStore((state) => state.t);
+  const language = useLanguageStore((state) => state.language);
 
-      // Profile modalni tashqariga bosganda yopish
-      useEffect(() => {
-        const handleClickOutside = (event) => {
-          if (
-            profileRef.current &&
-            !profileRef.current.contains(event.target)
-          ) {
-            setIsProfileOpen(false);
-          }
-        };
+  const logOut = useAuthStore((state) => state.logOut);
 
-        document.addEventListener("mousedown", handleClickOutside);
-        return () =>
-          document.removeEventListener("mousedown", handleClickOutside);
-      }, []);
+  const navigate = useNavigate();
+  // Profile modalni tashqariga bosganda yopish
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
 
-      // User ma'lumotlari (API dan keladi)
-      const userData = {
-        name: "Rektor",
-        email: "rector@camu.uz",
-        avatar:
-          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      };
-      const handleLogout = () => {
-        console.log("Chiqish amalga oshirildi");
-        // Logout logikasi
-      };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // User ma'lumotlari (API dan keladi)
+  const userData = {
+    name: "Rektor",
+    email: "rector@camu.uz",
+    avatar:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+  };
+  const handleLogout = () => {
+    logOut();
+    sessionStorage.removeItem("accessToken");
+    navigate("/login");
+    toast.success(t("profile.logout_success"));
+  };
   return (
     <header className="w-full h-16 bg-gradient-to-r from-gray-900 to-blue-900 border-b border-gray-700 shadow-lg flex items-center justify-between px-6">
       <div className="flex items-center gap-4">

@@ -1,8 +1,26 @@
-import { ShoppingCart } from "lucide-react";
-
 const tranlations = {
   uz: {
-    welcome: "Xush kelibsiz",
+    welcome: "Xush kelibsiz, Rektor",
+    desc: "Sizning boshqaruv panelingizga hush kelibsiz. Bu yerda umumiy statistika va so‘nggi ma’lumotlarni ko‘rishingiz mumkin.",
+    stats: {
+      students: "Umumiy talabalar",
+      teachers: "O‘qituvchilar",
+      subjects: "Fanlar",
+      applications: "Yangi arizalar",
+    },
+    recent: {
+      title: "Oxirgi arizalar",
+      durationTime: "soat oldin",
+      durationDay: "kun oldin",
+      view_all: "Hammasini ko'rish",
+    },
+    news: {
+      title: "Yangiliklar",
+      item1: "Universitetda yangi semestr 10-oktabrdan boshlanadi.",
+      item2: "Eng yaxshi talabalar tanlovi uchun ro'yxatga olish boshlandi.",
+      item3: "Yangi darsliklar elektron kutubxonaga yuklandi.",
+      all_news: "Barcha yangiliklar",
+    },
     login: {
       title: "Kirish",
       username: "Foydalanuvchi ismi",
@@ -17,17 +35,49 @@ const tranlations = {
     sidebar: {
       dashboard: "Bosh sahifa",
       reports: "Xisobotlar",
-      settings: "Sozlamalar",
+      reports_finance: "Moliyaviy hisobotlar",
+      reports_marketting: "Marketing hisobotlari",
+      students: "Talabalar",
     },
     validation: {
       username_required: "Foydalanuvchi ismi kiritilishi shart",
       password_required: "Parol kiritilishi shart",
       password_min: "Parol kamida 4 ta belgidan iborat bo‘lishi kerak",
     },
-    
+    role: "Rektor",
+    super_admin: "Super Admin",
+    profile: {
+      profile_title: "Profilim",
+      profile_subtitle: "Shaxsiy ma'lumotlar",
+      settings_title: "Sozlamalar",
+      settings_subtitle: "Tizim sozlamalari",
+      logout_title: "Chiqish",
+      logout_subtitle: "Hisobdan chiqish",
+    },
+    loading: "Ma'lumotlar yuklanmoqda...",
   },
   en: {
-    welcome: "Welcome",
+    welcome: "Welcome, Rector",
+    desc: "Welcome to your dashboard. Here you can see general statistics and recent data.",
+    stats: {
+      students: "Total Students",
+      teachers: "Teachers",
+      subjects: "Subjects",
+      applications: "New Applications",
+    },
+    recent: {
+      title: "Recent Applications",
+      durationTime: "hours ago",
+      durationDay: "days ago",
+      view_all: "View All",
+    },
+    news: {
+      title: "News",
+      item1: "The new semester at the university starts on October 10.",
+      item2: "Registration for the best student competition has started.",
+      item3: "New textbooks have been uploaded to the electronic library.",
+      all_news: "All News",
+    },
     login: {
       title: "Login",
       username: "Username",
@@ -42,16 +92,49 @@ const tranlations = {
     sidebar: {
       dashboard: "Dashboard",
       reports: "Reports",
-      settings: "Settings",
+      reports_finance: "Financial Reports",
+      reports_marketting: "Marketing Reports",
+      students: "Students",
     },
     validation: {
       username_required: "Username is required",
       password_required: "Password is required",
       password_min: "Password must be at least 4 characters",
     },
+    role: "Rector",
+    super_admin: "Super Admin",
+    profile: {
+      profile_title: "My Profile",
+      profile_subtitle: "Personal Information",
+      settings_title: "Settings",
+      settings_subtitle: "System Settings",
+      logout_title: "Logout",
+      logout_subtitle: "Sign out of your account",
+    },
+    loading: "Loading data...",
   },
   ru: {
-    welcome: "Добро пожаловать",
+    welcome: "Добро пожаловать, Ректор",
+    desc: "Добро пожаловать на вашу панель управления. Здесь вы можете видеть общую статистику и последние данные.",
+    stats: {
+      students: "Всего студентов",
+      teachers: "Преподаватели",
+      subjects: "Предметы",
+      applications: "Новые заявки",
+    },
+    recent: {
+      title: "Последние заявки",
+      durationTime: "часов назад",
+      durationDay: "дней назад",
+      view_all: "Посмотреть все",
+    },
+    news: {
+      title: "Новости",
+      item1: "Новый семестр в университете начинается 10 октября.",
+      item2: "Началась регистрация на конкурс лучших студентов.",
+      item3: "Новые учебники загружены в электронную библиотеку.",
+      all_news: "Все новости",
+    },
     login: {
       title: "Вход",
       username: "Имя пользователя",
@@ -66,13 +149,26 @@ const tranlations = {
     sidebar: {
       dashboard: "Панель управления",
       reports: "Отчеты",
-      settings: "Настройки",
+      reports_finance: "Финансовые отчеты",
+      reports_marketting: "Маркетинговые отчеты",
+      students: "Студенты",
     },
     validation: {
       username_required: "Имя пользователя обязательно",
       password_required: "Пароль обязателен",
       password_min: "Пароль должен содержать минимум 4 символа",
     },
+    role: "Ректор",
+    super_admin: "Супер Админ",
+    profile: {
+      profile_title: "Мой профиль",
+      profile_subtitle: "Личная информация",
+      settings_title: "Настройки",
+      settings_subtitle: "Системные настройки",
+      logout_title: "Выйти",
+      logout_subtitle: "Выйти из аккаунта",
+    },
+    loading: "Загрузка данных...",
   },
 };
 export default tranlations;

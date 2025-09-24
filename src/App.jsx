@@ -4,6 +4,8 @@ import MainLayout from "./layouts/MainLayout";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Students from "./pages/Students";
+import Finance from "./pages/Finance";
+import Marketing from "./pages/Marketing";
 
 function App() {
   return (
@@ -18,7 +20,11 @@ function App() {
           {/* Main layout */}
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Home />} />
-            <Route path="/students" element={<Students/>}/>
+            <Route path="/reports">
+              <Route path="finance" element={<Finance />} />
+              <Route path="marketing" element={<Marketing />} />
+            </Route>
+            <Route path="/students" element={<Students />} />
           </Route>
         </Routes>
       </BrowserRouter>

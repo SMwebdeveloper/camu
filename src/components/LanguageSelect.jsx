@@ -31,7 +31,7 @@ export default function LanguageSelect() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 px-3 py-1 rounded-md bg-gray-800 text-gray-100 hover:bg-gray-700 transition"
+        className="flex items-center gap-2 px-3 py-1 rounded-md bg-gradient-to-l from-gray-900 to-blue-900 text-gray-100 shadow-lg hover:bg-gray-700 transition"
       >
         <span className="text-lg">{active.emoji}</span>
         <span className="uppercase">{active.code}</span>
@@ -51,7 +51,7 @@ export default function LanguageSelect() {
       </button>
 
       <ul
-        className={`absolute right-0 mt-2 w-full bg-gray-900 rounded-md shadow-lg ring-1 ring-black ring-opacity-30 z-50 
+        className={`absolute right-0 mt-2 w-full bg-gradient-to-b from-gray-900 to-blue-900 rounded-md shadow-lg ring-1 py-1 ring-black ring-opacity-30 z-50 
     transition-all duration-200 ease-out 
     ${
       open
@@ -66,10 +66,10 @@ export default function LanguageSelect() {
               setLang(l.code);
               setOpen(false);
             }}
-            className={`flex items-center gap-3 px-3 py-2 cursor-pointer ${
+            className={`flex items-center gap-3 w-[90%] mb-1 last:mb-0 h-10 rounded-lg mx-auto px-3  cursor-pointer ${
               l.code === language
-                ? "bg-gray-800 text-white font-medium"
-                : "text-gray-200 hover:bg-gray-800"
+                ? "bg-[rgba(255,255,255,0.3)] text-white font-medium"
+                : "text-gray-200 hover:bg-[rgba(255,255,255,0.1)]"
             }`}
           >
             <span className="text-lg">{l.emoji}</span>

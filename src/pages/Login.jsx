@@ -3,13 +3,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthSchema } from "../lib/validation";
 import { useMutation } from "@tanstack/react-query";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import Logo from "../../public/logo.jpg";
+import Logo from "../assets/logo.jpg";
 import $axios from "../http";
 import { useState } from "react";
 import useLanguageStore from "../store/useLanguage";
 import useAuthStore from "../store/useAuth";
 import {useNavigate} from 'react-router-dom'
 import ButtonLoader from "../components/ButtonLoader";
+import toast from "react-hot-toast";
 // import LanguageSelect from "../components/LanguageSelect";
 
 export default function Login() {
@@ -45,7 +46,10 @@ export default function Login() {
     onSuccess: (data) => {
       setUser(data);
       sessionStorage.setItem("accessToken", data.data.access_token)
-      navigate('/')
+      navigate('/', {
+        state: { from: "/login", firstVisit: true },
+      })
+      toast.success("Tizimga muvaffaqiyatli kirdingiz!");
     },
     onError: (error) => {
       console.log(error);

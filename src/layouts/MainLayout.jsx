@@ -12,6 +12,9 @@ const MainLayout = () => {
       {/* Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
+        onToggleSidebar={() => {
+          setSidebarOpen(!sidebarOpen);
+        }}
         mobileOpen={mobileSidebarOpen}
         onClose={() => setMobileSidebarOpen(false)}
       />
@@ -22,7 +25,6 @@ const MainLayout = () => {
         <Header
           onToggleSidebar={() => {
             setSidebarOpen(!sidebarOpen);
-            console.log(sidebarOpen);
           }}
           onToggleMobile={() => setMobileSidebarOpen(!mobileSidebarOpen)}
         />

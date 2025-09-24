@@ -1,30 +1,30 @@
-// src/pages/Students.jsx
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FaEdit, FaTrash, FaPlus, FaFilter, FaChevronDown } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { MdArrowBackIos, MdArrowForwardIos } from "react-icons/md";
+import { motion } from "framer-motion";
 import $axios from "../http/index";
 import useLanguageStore from "../store/useLanguage";
 import CustomSelect from "../components/CustomSelect";
 import SearchInput from "../components/SearchInput";
+import Loader from "../components/Loader";
 
 const Students = () => {
   const [filters, setFilters] = useState({
     search: "",
-    course: "",
+    kurs: "",
     group: "",
     status: "",
   });
+  const [tempFilters, setTempFilters] = useState(filters);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
   });
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const t = useLanguageStore((state) => state.t);
   const queryClient = useQueryClient();
 
-  // Ma'lumotlar ro'yxati
   const courses = [
     { id: "", name: t("students.all_courses") },
     { id: "1", name: "1-kurs" },
@@ -33,65 +33,71 @@ const Students = () => {
     { id: "4", name: "4-kurs" },
   ];
 
-  const groups = [
-    { id: "", name: t("students.all_groups") },
-    { id: "101", name: "101-guruh" },
-    { id: "102", name: "102-guruh" },
-    { id: "201", name: "201-guruh" },
-    { id: "202", name: "202-guruh" },
-  ];
-
   const statuses = [
     { id: "", name: t("students.all_statuses") },
-    { id: "active", name: t("students.status.active") },
-    { id: "inactive", name: t("students.status.inactive") },
-    { id: "graduated", name: t("students.status.graduated") },
+    { id: "studying", name: t("students.table.status_value.studying") },
+    { id: "expelled", name: t("students.table.status_value.expelled") },
+    { id: "graduated", name: t("students.table.status_value.graduated") },
   ];
 
-  // Students ma'lumotlarini olish
-  const {
-    data: studentsData,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: studentsData, isLoading } = useQuery({
     queryKey: ["students", filters, pagination],
     queryFn: async () => {
       const params = {
         page: pagination.page,
         limit: pagination.limit,
-        ...filters,
       };
 
-      // Bo'sh filterlarni olib tashlaymiz
-      Object.keys(params).forEach((key) => {
-        if (params[key] === "") {
-          delete params[key];
-        }
-      });
+      if (filters.search) {
+        params.search = filters.search;
+      }
+      if (filters.kurs) {
+        params.kurs = filters.kurs;
+      }
+      if (filters.status) {
+        params.status = filters.status;
+      }
+      if (filters.group) {
+        params.guruh = filters.group; // encodeURIComponent OLMASLIK KERAK
+      }
 
-      const response = await $axios.get("/students", { params });
-      return response.data.data;
+      const response = await $axios.get("/students", {
+        params: params,
+        paramsSerializer: (params) => {
+          return new URLSearchParams(params).toString();
+        },
+      });
+      return response.data;
     },
     keepPreviousData: true,
   });
 
-  // Filterlarni o'zgartirish
-  const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+  const handleTempFilterChange = (key, value) => {
+    setTempFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const applyFilters = () => {
+    setFilters(tempFilters);
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
-  // Sahifa o'zgartirish
+  const clearFilters = () => {
+    const defaultFilters = { search: "", kurs: "", group: "", status: "" };
+    setTempFilters(defaultFilters);
+    setFilters(defaultFilters);
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  };
+
   const handlePageChange = (newPage) => {
-    setPagination((prev) => ({ ...prev, page: newPage }));
+    if (newPage > 0 && newPage <= (studentsData?.pages || 1)) {
+      setPagination((prev) => ({ ...prev, page: newPage }));
+    }
   };
 
-  // Limit o'zgartirish
   const handleLimitChange = (newLimit) => {
-    setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }));
+    setPagination({ limit: newLimit, page: 1 });
   };
 
-  // Studentni o'chirish
   const handleDelete = async (studentId) => {
     if (window.confirm(t("students.delete_confirm"))) {
       try {
@@ -103,37 +109,74 @@ const Students = () => {
     }
   };
 
-  // Filterlarni tozalash
-  const clearFilters = () => {
-    setFilters({ search: "", course: "", group: "", status: "" });
-    setPagination((prev) => ({ ...prev, page: 1 }));
-    setShowMobileFilters(false);
+  const totalPages = studentsData?.pages || 1;
+  const studentsList = studentsData?.data || [];
+  const totalEntries = studentsData?.total || 0;
+
+  const getStatusKey = (status) => {
+    switch (status) {
+      case "o'qimoqda":
+        return "studying";
+      case "chetlatilgan":
+        return "expelled";
+      case "bitirgan":
+        return "graduated";
+      default:
+        return "";
+    }
   };
 
-  const totalPages = studentsData?.totalPages || 1;
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    const { page } = pagination;
+
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      pageNumbers.push(1);
+      if (page > 3) {
+        pageNumbers.push("...");
+      }
+      for (
+        let i = Math.max(2, page - 1);
+        i <= Math.min(totalPages - 1, page + 1);
+        i++
+      ) {
+        pageNumbers.push(i);
+      }
+      if (page < totalPages - 2) {
+        pageNumbers.push("...");
+      }
+      pageNumbers.push(totalPages);
+    }
+    return pageNumbers.filter(
+      (item, index, arr) => !(item === "..." && arr[index - 1] === "...")
+    );
+  };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
-    <div className="space-y-6 p-4">
-      {/* Sarlavha va Add button */}
-      <div className="bg-white rounded-2xl shadow-sm p-6">
+    <div className="space-y-6 p-4 md:p-6 lg:p-8 bg-gray-50 min-h-screen">
+      {/* Page Header and Actions */}
+      <div className="bg-white rounded-2xl shadow-sm p-4 md:p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-800">
               {t("students.title")}
             </h1>
-            <p className="text-gray-600 mt-1">{t("students.description")}</p>
+            <p className="text-sm md:text-base text-gray-600 mt-1">
+              {t("students.description")}
+            </p>
           </div>
           <button
-            className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 
-                          transition-colors flex items-center gap-2 shadow-lg hover:shadow-xl"
+            className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 
+                          transition-all duration-300 flex items-center justify-center sm:justify-start gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
             <FaPlus size={16} />
             {t("students.add_student")}
@@ -142,221 +185,253 @@ const Students = () => {
       </div>
 
       {/* Filter Section */}
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-        {/* Desktop Filters */}
-        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <SearchInput
-            value={filters.search}
-            onChange={(value) => handleFilterChange("search", value)}
-            placeholder={t("students.search_placeholder")}
-          />
-
-          <CustomSelect
-            options={courses}
-            value={filters.course}
-            onChange={(value) => handleFilterChange("course", value)}
-            placeholder={t("students.select_course")}
-          />
-
-          <CustomSelect
-            options={groups}
-            value={filters.group}
-            onChange={(value) => handleFilterChange("group", value)}
-            placeholder={t("students.select_group")}
-          />
-
-          <CustomSelect
-            options={statuses}
-            value={filters.status}
-            onChange={(value) => handleFilterChange("status", value)}
-            placeholder={t("students.select_status")}
-          />
-
-          <button
-            onClick={clearFilters}
-            className="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 
-                     transition-colors border border-transparent hover:border-gray-300"
-          >
-            {t("students.clear_filters")}
-          </button>
-        </div>
-
-        {/* Mobile Filter Toggle */}
-        <div className="lg:hidden">
-          <button
-            onClick={() => setShowMobileFilters(!showMobileFilters)}
-            className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-xl 
-                     flex items-center justify-between hover:bg-gray-200 transition-colors"
-          >
-            <span className="flex items-center gap-2">
-              <FaFilter size={16} />
-              {t("students.filters")}
-            </span>
-            <span
-              className={`transform transition-transform ${
-                showMobileFilters ? "rotate-180" : ""
-              }`}
+      <div className="bg-white rounded-2xl shadow-sm p-4 md:p-6">
+        <div className="flex flex-col lg:flex-row lg:items-end gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 flex-grow">
+            <SearchInput
+              value={tempFilters.search}
+              onChange={(value) => handleTempFilterChange("search", value)}
+              placeholder={t("students.search_placeholder")}
+            />
+            <CustomSelect
+              options={courses}
+              value={tempFilters.kurs}
+              onChange={(value) => handleTempFilterChange("kurs", value)}
+              placeholder={t("students.select_course")}
+            />
+            <SearchInput
+              value={tempFilters.group}
+              onChange={(value) => handleTempFilterChange("group", value)}
+              placeholder={t("students.all_groups")}
+            />
+            {/* <CustomSelect
+              options={statuses}
+              value={tempFilters.status}
+              onChange={(value) => handleTempFilterChange("status", value)}
+              placeholder={t("students.select_status")}
+            /> */}
+          </div>
+          <div className="flex gap-2 mt-4 lg:mt-0 w-full sm:w-auto">
+            <button
+              onClick={applyFilters}
+              className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
             >
-              <FaChevronDown size={14} />
-            </span>
-          </button>
-
-          {/* Mobile Filters Dropdown */}
-          {showMobileFilters && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mt-4 space-y-4"
+              {t("students.apply")}
+            </button>
+            <button
+              onClick={clearFilters}
+              className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
             >
-              <SearchInput
-                value={filters.search}
-                onChange={(value) => handleFilterChange("search", value)}
-                placeholder={t("students.search_placeholder")}
-              />
-
-              <CustomSelect
-                options={courses}
-                value={filters.course}
-                onChange={(value) => handleFilterChange("course", value)}
-                placeholder={t("students.select_course")}
-              />
-
-              <CustomSelect
-                options={groups}
-                value={filters.group}
-                onChange={(value) => handleFilterChange("group", value)}
-                placeholder={t("students.select_group")}
-              />
-
-              <CustomSelect
-                options={statuses}
-                value={filters.status}
-                onChange={(value) => handleFilterChange("status", value)}
-                placeholder={t("students.select_status")}
-              />
-
-              <div className="flex gap-2">
-                <button
-                  onClick={clearFilters}
-                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl 
-                           hover:bg-gray-200 transition-colors"
-                >
-                  {t("students.clear")}
-                </button>
-                <button
-                  onClick={() => setShowMobileFilters(false)}
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl 
-                           hover:bg-blue-700 transition-colors"
-                >
-                  {t("students.apply")}
-                </button>
-              </div>
-            </motion.div>
-          )}
+              {t("students.clear_filters")}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Jadval */}
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("students.table.no")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("students.table.full_name")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("students.table.group")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("students.table.course")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("students.table.status")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("students.table.actions")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {studentsData?.map((student, index) => (
-                <tr
-                  key={student.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {(pagination.page - 1) * pagination.limit + index + 1}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {student.full_name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {student.phone}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {student.group}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {student.course}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                        student.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : student.status === "inactive"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-blue-100 text-blue-800"
-                      }`}
-                    >
-                      {t(`students.status.${student.status}`)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex space-x-2">
-                      <button
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title={t("students.edit")}
-                      >
-                        <FaEdit size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(student.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title={t("students.delete")}
-                      >
-                        <FaTrash size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {(!studentsData || studentsData?.length === 0) && (
-          <div className="text-center py-12">
+      {/* Students List (Mobile - Cards) */}
+      <div className="lg:hidden space-y-4">
+        {studentsList.length > 0 ? (
+          studentsList.map((student) => (
+            <motion.div
+              key={student.id}
+              className="bg-white rounded-2xl shadow-sm p-4 space-y-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    {student.fish}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {student.tel_nomer1}
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title={t("students.edit")}
+                  >
+                    <FaEdit size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(student.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title={t("students.delete")}
+                  >
+                    <FaTrash size={16} />
+                  </button>
+                </div>
+              </div>
+              <div className="border-t border-gray-100 pt-3 space-y-2 text-sm text-gray-600">
+                <p>
+                  <span className="font-medium">
+                    {t("students.table.group")}:
+                  </span>{" "}
+                  <span className="text-gray-900">{student.guruh}</span>
+                </p>
+                <p>
+                  <span className="font-medium">
+                    {t("students.table.direction")}:
+                  </span>{" "}
+                  <span className="text-gray-900">{student.yonalish}</span>
+                </p>
+                <p>
+                  <span className="font-medium">
+                    {t("students.table.course")}:
+                  </span>{" "}
+                  <span className="text-gray-900">{student.kurs}</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="font-medium">
+                    {t("students.table.status_header")}:
+                  </span>
+                  <span
+                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      getStatusKey(student.holat) === "studying"
+                        ? "bg-green-100 text-green-800"
+                        : getStatusKey(student.holat) === "expelled"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-blue-100 text-blue-800"
+                    }`}
+                  >
+                    {t(
+                      `students.table.status_value.${
+                        student.holat === "o'qimoqda"
+                          ? "studying"
+                          : student.holat === "chetlatilgan"
+                          ? "expelled"
+                          : "graduated"
+                      }`
+                    )}
+                  </span>
+                </p>
+              </div>
+            </motion.div>
+          ))
+        ) : (
+          <div className="bg-white rounded-2xl shadow-sm text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">📊</div>
             <p className="text-gray-500 text-lg">{t("students.no_data")}</p>
           </div>
         )}
       </div>
 
-      {/* Pagination - Mobile friendly */}
-      <div className="bg-white rounded-2xl shadow-sm p-6">
+      {/* Students Table (Desktop) */}
+      <div className="hidden lg:block bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t("students.table.no")}
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t("students.table.full_name")}
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t("students.table.group")}
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t("students.table.course")}
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t("students.table.direction")}
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t("students.table.status_header")}
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t("students.table.actions")}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {studentsList.length > 0 ? (
+                studentsList.map((student, index) => (
+                  <tr
+                    key={student.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="p-4 text-sm text-gray-900">
+                      {(studentsData.current_page - 1) * pagination.limit +
+                        index +
+                        1}
+                    </td>
+                    <td className="p-4">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {student.fish}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {student.tel_nomer1}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4 text-sm text-gray-900">
+                      {student.guruh}
+                    </td>
+                    <td className="p-4 text-sm text-gray-900">
+                      {student.kurs}
+                    </td>
+                    <td className="p-4 text-sm text-gray-900">
+                      {student.yonalish}
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          getStatusKey(student.holat) === "studying"
+                            ? "bg-green-100 text-green-800"
+                            : getStatusKey(student.holat) === "expelled"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
+                        {t(
+                          `students.table.status_value.${getStatusKey(
+                            student.holat
+                          )}`
+                        )}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex space-x-2">
+                        <button
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title={t("students.edit")}
+                        >
+                          <FaEdit size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(student.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title={t("students.delete")}
+                        >
+                          <FaTrash size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="text-center py-12">
+                    <div className="text-gray-400 text-6xl mb-4">📊</div>
+                    <p className="text-gray-500 text-lg">
+                      {t("students.no_data")}
+                    </p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      <div className="bg-white rounded-2xl shadow-sm p-4 md:p-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Limit selector */}
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-700">{t("students.show")}</span>
             <CustomSelect
@@ -375,66 +450,52 @@ const Students = () => {
             </span>
           </div>
 
-          {/* Pagination controls */}
           <div className="flex items-center space-x-1">
             <button
               onClick={() => handlePageChange(pagination.page - 1)}
               disabled={pagination.page <= 1}
-              className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 
-                       disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+              className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
             >
               <MdArrowBackIos size={14} />
             </button>
 
-            {/* Mobile pagination - qisqartirilgan */}
-            <div className="flex space-x-1">
-              {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 3) {
-                  pageNum = i + 1;
-                } else if (pagination.page === 1) {
-                  pageNum = i + 1;
-                } else if (pagination.page === totalPages) {
-                  pageNum = totalPages - 2 + i;
-                } else {
-                  pageNum = pagination.page - 1 + i;
-                }
-
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`px-3 py-1 rounded-lg border text-sm ${
-                      pagination.page === pageNum
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-            </div>
+            {getPageNumbers().map((pageNum, index) =>
+              pageNum === "..." ? (
+                <span key={index} className="px-3 py-1 text-gray-500">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`px-3 py-1 rounded-lg border text-sm transition-colors ${
+                    pagination.page === pageNum
+                      ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                      : "border-gray-300 text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              )
+            )}
 
             <button
               onClick={() => handlePageChange(pagination.page + 1)}
               disabled={pagination.page >= totalPages}
-              className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 
-                       disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+              className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
             >
               <MdArrowForwardIos size={14} />
             </button>
           </div>
 
-          {/* Ma'lumotlar soni */}
           <div className="text-sm text-gray-700 text-center sm:text-right">
             {t("students.showing")}{" "}
-            {(pagination.page - 1) * pagination.limit + 1}-
+            {(studentsData?.current_page - 1) * pagination.limit + 1}-
             {Math.min(
-              pagination.page * pagination.limit,
-              studentsData?.total || 0
-            )}
-            {t("students.of")} {studentsData?.total || 0}
+              studentsData?.current_page * pagination.limit,
+              totalEntries
+            )}{" "}
+            {t("students.of")} {totalEntries}
           </div>
         </div>
       </div>

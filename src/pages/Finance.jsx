@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   FiFilter,
@@ -7,6 +7,7 @@ import {
   FiTrendingDown,
   FiPieChart,
   FiBarChart2,
+  FiXCircle,
 } from "react-icons/fi";
 import $axios from "../http/index";
 import Loader from "../components/Loader";
@@ -14,6 +15,8 @@ import useLanguageStore from "../store/useLanguage";
 import FinanceTable from "../components/FinanceTable";
 import PieChart from "../components/PieChart";
 import StatCard from "../components/StatCard";
+import CustomSelect from "../components/CustomSelect";
+import SearchInput from "../components/SearchInput";
 
 // 📌 API fetch
 const fetchFinanceData = async (filters = {}) => {
@@ -31,9 +34,10 @@ const fetchFinanceData = async (filters = {}) => {
 };
 
 export default function FinanceDashboard() {
-    const t = useLanguageStore((state) => state.t);
-    const language = useLanguageStore((state) => state.language);
-  const [filters, setFilters] = useState({
+  const t = useLanguageStore((state) => state.t);
+  const language = useLanguageStore((state) => state.language);
+
+  const [tempFilters, setTempFilters] = useState({
     kurs: "",
     guruh: "",
     yonalish: "",
@@ -41,7 +45,7 @@ export default function FinanceDashboard() {
   });
   const [appliedFilters, setAppliedFilters] = useState({});
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["finance", appliedFilters],
     queryFn: () => fetchFinanceData(appliedFilters),
     refetchOnWindowFocus: false,
@@ -57,6 +61,31 @@ export default function FinanceDashboard() {
       }
     : null;
 
+  const handleTempFilterChange = (key, value) => {
+    setTempFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleApplyFilters = () => {
+    setAppliedFilters(tempFilters);
+  };
+
+  const handleClearFilters = () => {
+    setTempFilters({
+      kurs: "",
+      guruh: "",
+      yonalish: "",
+      oquv_yili: "",
+    });
+    setAppliedFilters({});
+  };
+
+  const directionOptions = [
+    { id: "", name: t("finance.filters.select.direction") },
+    { id: "Davolash", name: t("finance.filters.select.treatment") },
+    { id: "Stamatologiya", name: t("finance.filters.select.stomatology") },
+    { id: "Pediyatriya", name: t("finance.filters.select.pediatrics") },
+  ];
+
   if (isLoading) return <Loader />;
   if (error)
     return <div className="text-center text-red-600">{error.message}</div>;
@@ -64,57 +93,54 @@ export default function FinanceDashboard() {
   return (
     <div className="space-y-6 p-4">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-2xl shadow-md flex justify-between items-center">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-2xl shadow-md flex flex-wrap justify-between items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold mb-2">{t("finance.title")}</h1>
-          <p className="text-sm opacity-90">
-            {t("finance.description")}
-          </p>
+          <p className="text-sm opacity-90">{t("finance.description")}</p>
         </div>
-        <button
-          className="bg-white text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-100"
-          onClick={() => setAppliedFilters(filters)}
-        >
-          <FiFilter /> {t("finance.filter.apply")}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            className="bg-white text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-100"
+            onClick={handleClearFilters}
+          >
+            <FiXCircle /> {t("finance.filters.clear")}
+          </button>
+          <button
+            className="bg-white text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-100"
+            onClick={handleApplyFilters}
+          >
+            <FiFilter /> {t("finance.filters.apply")}
+          </button>
+        </div>
       </div>
 
       {/* Filter panel */}
-      <div className="bg-white shadow p-4 rounded-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <input
+      <div className="bg-white shadow p-4 rounded-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <SearchInput
           placeholder={t("finance.filters.course")}
-          className="border outline-blue-600 rounded-lg px-3 py-2"
-          value={filters.kurs}
-          onChange={(e) => setFilters({ ...filters, kurs: e.target.value })}
+          value={tempFilters.kurs}
+          onChange={(value) => handleTempFilterChange("kurs", value)}
         />
-        <input
+        <SearchInput
           placeholder={t("finance.filters.group")}
-          className="border outline-blue-600 rounded-lg px-3 py-2"
-          value={filters.guruh}
-          onChange={(e) => setFilters({ ...filters, guruh: e.target.value })}
+          value={tempFilters.guruh}
+          onChange={(value) => handleTempFilterChange("guruh", value)}
         />
-        <select
-          className="border outline-blue-600 rounded-lg px-3 py-2"
-          value={filters.yonalish}
-          onChange={(e) => setFilters({ ...filters, yonalish: e.target.value })}
-        >
-          <option value="">{t("finance.filters.select.direction")}</option>
-          <option value="Davolash">{t("finance.filters.select.treatment")}</option>
-          <option value="Stamatologiya">{t("finance.filters.select.stomotology")}</option>
-          <option value="Pediyatriya">{t("finance.filters.select.pediatrics")}</option>
-        </select>
-        <input
+        <CustomSelect
+          options={directionOptions}
+          value={tempFilters.yonalish}
+          onChange={(value) => handleTempFilterChange("yonalish", value)}
+          placeholder={t("finance.filters.select.direction")}
+        />
+        <SearchInput
           placeholder={t("finance.filters.academic_year")}
-          className="border outline-blue-600 rounded-lg px-3 py-2"
-          value={filters.oquv_yili}
-          onChange={(e) =>
-            setFilters({ ...filters, oquv_yili: e.target.value })
-          }
+          value={tempFilters.oquv_yili}
+          onChange={(value) => handleTempFilterChange("oquv_yili", value)}
         />
       </div>
 
       {/* Statistik Kartalar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatCard
           title={t("finance.stats.total_payments")}
           value={formattedData?.tolov_summa_umumiy}
@@ -161,7 +187,9 @@ export default function FinanceDashboard() {
           <PieChart data={formattedData} />
         </div>
         <div className="bg-white rounded-2xl shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-4">{t("finance.table.table_title")}</h2>
+          <h2 className="text-lg font-semibold mb-4">
+            {t("finance.table.table_title")}
+          </h2>
           <FinanceTable data={formattedData} />
         </div>
       </div>

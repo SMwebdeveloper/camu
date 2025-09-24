@@ -1,3 +1,11 @@
+import {
+  FiDollarSign,
+  FiTrendingUp,
+  FiTrendingDown,
+  FiPieChart,
+  FiBarChart2,
+} from "react-icons/fi";
+
 const StatCard = ({ title, value, icon, bgColor, borderColor }) => (
   <div
     className={`p-5 rounded-xl border ${borderColor} shadow-sm ${bgColor} hover:shadow-md transition`}
@@ -13,4 +21,5 @@ const StatCard = ({ title, value, icon, bgColor, borderColor }) => (
     </div>
   </div>
 );
+
 export default StatCard;

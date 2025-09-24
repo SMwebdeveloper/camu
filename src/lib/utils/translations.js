@@ -1,4 +1,5 @@
-const tranlations = {
+// src/i18n/translations.js
+const translations = {
   uz: {
     welcome: "Xush kelibsiz, Rektor",
     desc: "Sizning boshqaruv panelingizga hush kelibsiz. Bu yerda umumiy statistika va so‘nggi ma’lumotlarni ko‘rishingiz mumkin.",
@@ -64,9 +65,12 @@ const tranlations = {
       all_courses: "Barcha Kurslar",
       all_groups: "Barcha Guruhlar",
       all_statuses: "Barcha Holatlar",
-      clear_filters: "Filterni Tozalash",
+      clear_filters: "Tozalash",
       delete_confirm: "Bu talabani o'chirishni istaysizmi?",
       error_loading: "Talabalar ma'lumotlarini yuklashda xatolik",
+      add_student: "Talaba qo'shish",
+      apply: "Filterlash",
+      clear: "Tozalash",
       no_data: "Talabalar topilmadi",
       showing: "Ko'rsatilmoqda",
       of: "dan",
@@ -83,9 +87,15 @@ const tranlations = {
         group: "Guruh",
         course: "Kurs",
         direction: "Yo'nalish",
-        status: "Holat",
+        status_header: "Holat", // Kalit nomi o'zgartirildi
         phone: "Telefon Raqam",
         actions: "Amallar",
+        status_value: {
+          // Kalit nomi o'zgartirildi
+          studying: "O'qimoqda",
+          expelled: "Chetlatilgan",
+          graduated: "Bitirgan",
+        },
       },
       edit: "Tahrirlash",
       delete: "O'chirish",
@@ -99,7 +109,8 @@ const tranlations = {
         group: "Guruh",
         direction: "Yo'nalish",
         academic_year: "O'quv yili",
-        apply: "Filterni qo'llash",
+        apply: "Filterlash",
+        clear: "Tozalash",
         select: {
           direction: "Yo'nalishni",
           treatment: "Davolash",
@@ -197,10 +208,12 @@ const tranlations = {
       title: "Students Management",
       description: "Manage all students information",
       search_placeholder: "Search students...",
+      add_student: "Add Student",
       all_courses: "All Courses",
       all_groups: "All Groups",
       all_statuses: "All Statuses",
-      clear_filters: "Clear Filters",
+      apply: "Filters",
+      clear_filters: "Clear",
       delete_confirm: "Are you sure you want to delete this student?",
       error_loading: "Error loading students data",
       no_data: "No students found",
@@ -219,9 +232,14 @@ const tranlations = {
         group: "Group",
         course: "Course",
         direction: "Direction",
-        status: "Status",
+        status_header: "Status",
         phone: "Phone Number",
         actions: "Actions",
+        status_value: {
+          studying: "Studying",
+          expelled: "Expelled",
+          graduated: "Graduated",
+        },
       },
       edit: "Edit",
       delete: "Delete",
@@ -234,7 +252,8 @@ const tranlations = {
         group: "Group",
         direction: "Direction",
         academic_year: "Academic Year",
-        apply: "Apply Filters",
+        apply: "Filters",
+        clear: "Clear",
         select: {
           direction: "Select Direction",
           treatment: "Treatment",
@@ -332,10 +351,12 @@ const tranlations = {
       title: "Управление Студентами",
       description: "Управление информацией о всех студентах",
       search_placeholder: "Поиск студентов...",
+      add_student: "Добавить Студента",
       all_courses: "Все Курсы",
       all_groups: "Все Группы",
       all_statuses: "Все Статусы",
-      clear_filters: "Очистить Фильтры",
+      apply: "Фильтры",
+      clear_filters: "Очистить",
       delete_confirm: "Вы уверены, что хотите удалить этого студента?",
       error_loading: "Ошибка загрузки данных студентов",
       no_data: "Студенты не найдены",
@@ -354,11 +375,15 @@ const tranlations = {
         group: "Группа",
         course: "Курс",
         direction: "Направление",
-        status: "Статус",
+        status_header: "Статус",
         phone: "Телефон",
         actions: "Действия",
+        status_value: {
+          studying: "Учится",
+          expelled: "Отчислен",
+          graduated: "Выпускник",
+        },
       },
-
       edit: "Редактировать",
       delete: "Удалить",
     },
@@ -370,7 +395,8 @@ const tranlations = {
         group: "Группа",
         direction: "Направление",
         academic_year: "Учебный год",
-        apply: "Применить фильтры",
+        apply: "Фильтры",
+        clear: "Очистить",
         select: {
           direction: "Выберите направление",
           treatment: "Лечение",
@@ -407,4 +433,4 @@ const tranlations = {
     },
   },
 };
-export default tranlations;
+export default translations;
